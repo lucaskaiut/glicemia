@@ -13,6 +13,15 @@ outra conta.
 Identidade visual própria — "Papel & Tinta" — documentada em
 `nox-skeleton/docs/visual-identities.md`.
 
+## Em produção
+
+| | |
+|---|---|
+| Painel | https://glicosimetro.noxtecnologias.com.br (Vercel, projeto `glicemia`, deploy a cada push) |
+| API | https://glicosimetro-api.noxtecnologias.com.br (Swarm `infra-app-glicemia`, deploy pelo Jenkins `deploy-glicemia-webhook` a cada push em `main` que altere `api/`) |
+| Leitor | [última release](https://github.com/lucaskaiut/glicemia/releases/latest) — `glicemia-leitor.exe` |
+| Infra | `lucaskaiut/infra` → `stacks/apps/glicemia`, `ci/apps/glicemia.sh` |
+
 ```
 glicemia/
 ├── api/      Laravel — módulo App\Modules\Glucose
@@ -60,8 +69,9 @@ Faixas configuráveis por env: `GLUCOSE_VERY_LOW` (54), `GLUCOSE_LOW` (70), `GLU
   `SANCTUM_STATEFUL_DOMAINS`, `SESSION_DOMAIN`, banco, `APP_ENV=production` e `APP_DEBUG=false`.
   O seed (conta `admin@glicemia.localhost`) só roda com `APP_ENV=local`.
 - **Painel:** `npm run build` em `web/` e defina `VITE_API_BASE_URL` com a URL da API.
-- **Leitor:** crie no painel um token só com `glucose.import` e use a URL de produção em
-  `glicemia-leitor.json`.
+- **Leitor:** o `.exe` já aponta para a API de produção; cada pessoa o vincula à própria conta
+  colando o código gerado em *Aparelhos → Gerar código do leitor*. Nova versão: `npm run package`
+  no Windows e anexar o `.exe` a uma nova release (o painel baixa sempre a `latest`).
 - Dados de saúde: sirva tudo só por HTTPS.
 
 ## Leitor
