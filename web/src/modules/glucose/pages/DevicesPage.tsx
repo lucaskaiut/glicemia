@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Clock, Copy, Download, KeyRound, Smartphone } from 'lucide-react'
+import { Clock, Download, Smartphone } from 'lucide-react'
 import {
   Button,
   buttonClasses,
@@ -14,7 +14,6 @@ import {
 } from '@/shared/design-system'
 import { Can } from '@/app/guards/PermissionGuard'
 import { Permission } from '@/shared/constants/permissions'
-import { useCreateApiToken } from '@/modules/api-tokens/hooks/useApiTokens'
 import { formatDateTime } from '@/shared/utils/format'
 import { useGlucoseDevices, useUpdateDevice } from '../hooks/useGlucose'
 import type { ClockPeriod, GlucoseDevice } from '../types'
@@ -270,109 +269,52 @@ function DeviceCard({ device, onEdit }: { device: GlucoseDevice; onEdit: () => v
   )
 }
 
-const READER_DOWNLOAD_URL = 'https://github.com/lucaskaiut/glicemia/releases/latest/download/glicemia-leitor.exe'
-
-function ReaderCodeModal({ code, onClose }: { code: string; onClose: () => void }) {
-  const [copied, setCopied] = useState(false)
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(code)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 2000)
-    } catch {
-      setCopied(false)
-    }
-  }
-
-  return (
-    <Modal
-      open
-      onClose={onClose}
-      title="Código do leitor"
-      description="Cole este código no glicemia-leitor.exe quando ele pedir. Ele aparece só agora — se perder, gere outro."
-      footer={<Button onClick={onClose}>Concluir</Button>}
-    >
-      <div className="grid gap-3">
-        <div className="flex items-stretch gap-2">
-          <code className="flex-1 overflow-x-auto rounded-md bg-surface-2 px-3 py-2.5 font-mono text-sm break-all text-foreground">{code}</code>
-          <Button variant="secondary" onClick={copy} aria-label="Copiar código">
-            {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-            {copied ? 'Copiado' : 'Copiar'}
-          </Button>
-        </div>
-        <p className="text-[13px] text-muted">
-          O código só permite <strong>enviar medições</strong> para a sua conta — não dá acesso para ler seus dados. Você pode
-          revogá-lo em Ajustes → Tokens de API.
-        </p>
-      </div>
-    </Modal>
-  )
-}
+const APP_DOWNLOAD_URL = 'https://github.com/lucaskaiut/glicemia/releases/latest/download/Glicemia-Setup.exe'
 
 function ReaderSetup() {
-  const createToken = useCreateApiToken()
-  const [code, setCode] = useState<string | null>(null)
-
-  const generate = () =>
-    createToken.mutate(
-      {
-        name: `Leitor do glicosímetro (${new Date().toLocaleDateString('pt-BR')})`,
-        expires_at: null,
-        permissions: [Permission.GLUCOSE_IMPORT],
-      },
-      { onSuccess: (issued) => setCode(issued.token) },
-    )
-
   return (
     <Card className="p-5 sm:p-6">
-      <h2 className="text-lg font-medium text-foreground">Configurar o leitor</h2>
+      <h2 className="text-lg font-medium text-foreground">Aplicativo para o computador</h2>
       <p className="mt-0.5 text-[13px] text-muted">
-        O leitor é um programa para Windows que fica em segundo plano: quando você conecta o glicosímetro no cabo USB,
-        ele lê a memória do aparelho e envia só as medições novas para a sua conta.
+        O app Glicemia fica perto do relógio do Windows: quando você liga o glicosímetro no cabo USB, ele lê a memória do
+        aparelho e envia só as medições novas para a sua conta.
       </p>
 
       <ol className="mt-5 space-y-5 text-sm">
         <li className="grid grid-cols-[2rem_1fr] gap-2">
           <span className="font-display text-xl text-accent">1</span>
           <div>
-            <p className="font-medium text-foreground">Baixe o leitor</p>
+            <p className="font-medium text-foreground">Baixe e instale o app</p>
             <p className="mt-0.5 text-muted">
-              Arquivo <code>glicemia-leitor.exe</code> (Windows 10/11). Na primeira vez, o Windows pode avisar que o
-              aplicativo é desconhecido: clique em <em>Mais informações → Executar assim mesmo</em>.
+              Windows 10 ou 11. Como o app ainda não tem assinatura digital, o Windows pode mostrar um aviso: clique em{' '}
+              <em>Mais informações → Executar assim mesmo</em>.
             </p>
-            <a href={READER_DOWNLOAD_URL} className={buttonClasses('secondary', 'sm', 'mt-2')}>
+            <a href={APP_DOWNLOAD_URL} className={buttonClasses('primary', 'sm', 'mt-2')}>
               <Download className="size-4" />
-              Baixar glicemia-leitor.exe
+              Baixar o Glicemia para Windows
             </a>
           </div>
         </li>
         <li className="grid grid-cols-[2rem_1fr] gap-2">
           <span className="font-display text-xl text-accent">2</span>
           <div>
-            <p className="font-medium text-foreground">Gere o código do leitor</p>
-            <p className="mt-0.5 text-muted">É o que liga o leitor à sua conta.</p>
-            <Can permission={Permission.API_TOKEN_CREATE}>
-              <Button size="sm" className="mt-2" onClick={generate} loading={createToken.isPending}>
-                <KeyRound className="size-4" />
-                Gerar código do leitor
-              </Button>
-            </Can>
+            <p className="font-medium text-foreground">Clique em “Conectar à minha conta”</p>
+            <p className="mt-0.5 text-muted">
+              O navegador abre nesta conta e pede sua permissão. O app só consegue <strong>enviar</strong> medições —
+              não lê os seus dados.
+            </p>
           </div>
         </li>
         <li className="grid grid-cols-[2rem_1fr] gap-2">
           <span className="font-display text-xl text-accent">3</span>
           <div>
-            <p className="font-medium text-foreground">Abra o leitor e cole o código</p>
+            <p className="font-medium text-foreground">Ligue o glicosímetro no cabo USB</p>
             <p className="mt-0.5 text-muted">
-              Ele confirma o nome da sua conta e pergunta se deve iniciar junto com o Windows. Depois disso, é só conectar
-              o glicosímetro (desligado, a tela mostra <strong>USb</strong>) — em uns 20 segundos as medições aparecem aqui.
+              Com o aparelho desligado (a tela mostra <strong>USb</strong>). Em uns 20 segundos as medições aparecem aqui.
             </p>
           </div>
         </li>
       </ol>
-
-      {code && <ReaderCodeModal code={code} onClose={() => setCode(null)} />}
     </Card>
   )
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { toast } from '@/shared/stores/toast.store'
 import { useSessionStore } from '@/shared/stores/session.store'
 import { useTenantContextStore } from '@/shared/stores/tenant.store'
+import { peekAfterLogin } from '@/shared/utils/after-login'
 import { authService, sessionQueryOptions } from '../services/auth.service'
 
 function useAuthenticate() {
@@ -13,7 +14,7 @@ function useAuthenticate() {
   return async () => {
     const session = await queryClient.fetchQuery(sessionQueryOptions)
     setSession(session)
-    navigate('/dashboard', { replace: true })
+    navigate(peekAfterLogin(), { replace: true })
   }
 }
 

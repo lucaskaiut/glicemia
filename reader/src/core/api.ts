@@ -28,8 +28,26 @@ const headers = (token: string) => ({
   Authorization: `Bearer ${token}`,
   Accept: 'application/json',
   'Content-Type': 'application/json',
-  'User-Agent': 'glicemia-leitor/1.1',
+  'User-Agent': 'glicemia-app/2.0',
 })
+
+/** Troca o código de autorização (OAuth + PKCE) por um token que só importa medições. */
+export async function exchangeCode(apiUrl: string, body: { code: string; code_verifier: string; redirect_uri: string }): Promise<{ token: string; account: string }> {
+  let response: Response
+  try {
+    response = await fetch(`${apiUrl}/reader/token`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'User-Agent': 'glicemia-app/2.0' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(20_000),
+    })
+  } catch (error) {
+    throw new ApiError(`Sem conexão com o Glicemia (${(error as Error).message})`, true)
+  }
+  const json = (await response.json().catch(() => null)) as { message?: string; data?: { token: string; account: string } } | null
+  if (response.ok && json?.data) return json.data
+  throw new ApiError(json?.message ?? `HTTP ${response.status}`, response.status >= 500, response.status)
+}
 
 /** Confere o código de vinculação e devolve o nome da conta. */
 export async function whoami(apiUrl: string, token: string): Promise<{ account: string }> {

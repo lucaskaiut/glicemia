@@ -1,5 +1,6 @@
 node_modules/
 dist/
+release/
 bin/
 glicemia-leitor.json
 pending.json

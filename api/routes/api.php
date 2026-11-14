@@ -11,6 +11,7 @@ use App\Modules\Glucose\Http\Controllers\GlucoseImportController;
 use App\Modules\Glucose\Http\Controllers\GlucoseReaderController;
 use App\Modules\Glucose\Http\Controllers\GlucoseReadingController;
 use App\Modules\Glucose\Http\Controllers\GlucoseSummaryController;
+use App\Modules\Reader\Http\Controllers\ReaderAuthorizationController;
 use App\Modules\Shared\Http\Controllers\FileUploadController;
 use App\Modules\Tenant\Http\Controllers\TenantController;
 use App\Modules\User\Http\Controllers\UserController;
@@ -29,6 +30,9 @@ Route::prefix('auth')->group(function (): void {
         Route::post('select-tenant', [AuthController::class, 'selectTenant']);
     });
 });
+
+// App desktop: troca do código de autorização (PKCE) por token — público, com limite.
+Route::post('reader/token', [ReaderAuthorizationController::class, 'token'])->middleware('throttle:auth');
 
 /*
  * Glicemia: cadastro gratuito, contas independentes. As rotas de billing (planos,
@@ -67,6 +71,8 @@ Route::middleware(['auth.multi:sanctum', 'tenant', 'subscription.active'])->grou
     Route::post('uploads', FileUploadController::class);
 
     // Glicemia
+    Route::get('reader/authorize', [ReaderAuthorizationController::class, 'preview'])->middleware('permission:glucose.import');
+    Route::post('reader/authorize', [ReaderAuthorizationController::class, 'authorizeApp'])->middleware('permission:glucose.import');
     Route::post('glucose/import', GlucoseImportController::class)->middleware('permission:glucose.import');
     Route::get('glucose/reader/whoami', [GlucoseReaderController::class, 'whoami'])->middleware('permission:glucose.import');
     Route::get('glucose/summary', GlucoseSummaryController::class)->middleware('permission:glucose.read');

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data:; script-src 'self'" />
+    <title>Glicemia</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="stripe" aria-hidden="true"><i class="vl"></i><i class="lo"></i><i class="in"></i><i class="hi"></i><i class="vh"></i></div>
+    <header>
+      <svg viewBox="0 0 32 32" class="logo" aria-hidden="true">
+        <rect width="32" height="32" rx="6" class="logo-bg" />
+        <path d="M16 6c-4.5 6-7 9.6-7 13a7 7 0 0 0 14 0c0-3.4-2.5-7-7-13z" class="logo-drop" />
+        <path d="M12.5 19.5h7" class="logo-line" stroke-width="2" stroke-linecap="round" />
+      </svg>
+      <span class="wordmark">Glicemia</span>
+    </header>
+    <main id="app" aria-live="polite"></main>
+    <footer id="footer"></footer>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

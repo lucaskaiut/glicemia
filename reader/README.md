@@ -1,49 +1,56 @@
-# glicemia-leitor
+# Glicemia — app para Windows
 
-Programa para Windows que fica em segundo plano: quando o **OK Meter Match II** é conectado
-no cabo USB, lê a memória do aparelho e envia as medições para `POST /api/glucose/import`.
+App desktop (Electron) que fica perto do relógio do Windows: quando o **OK Meter Match II** é
+ligado no cabo USB, lê a memória do aparelho e envia as medições novas para a conta do Glicemia.
 
-## Uso
+- **Instalar:** baixe `Glicemia-Setup.exe` na [última release](https://github.com/lucaskaiut/glicemia/releases/latest)
+  (instalação por usuário, sem administrador; atalho no Menu Iniciar e na Área de Trabalho).
+- **Conectar à conta:** botão *Conectar à minha conta* → o navegador abre o painel → a pessoa entra
+  (Google ou e-mail) e clica em *Permitir*. Ninguém copia código.
+- **Fechar a janela** mantém o app rodando no ícone perto do relógio; *Sair* fica no menu desse ícone.
+- **Iniciar com o Windows** é ligado ao conectar (pode desligar na janela).
 
-1. Baixe o `glicemia-leitor.exe` (link em **Aparelhos** no painel, ou na
-   [última release](https://github.com/lucaskaiut/glicemia/releases/latest)).
-2. No painel, em **Aparelhos**, clique em **Gerar código do leitor** — cria um token que só
-   pode *enviar* medições para a sua conta.
-3. Abra o `.exe` e cole o código. Ele mostra o nome da conta vinculada e pergunta se deve iniciar
-   com o Windows (copia-se para `%LOCALAPPDATA%\Programs\Glicemia` e roda oculto).
+## Como a conexão funciona (OAuth para apps nativos)
 
-| Comando | Faz |
-|---|---|
-| `glicemia-leitor.exe` | 1ª vez: vincula e instala. Depois: fica rodando e sincroniza a cada conexão |
-| `glicemia-leitor.exe --vincular` | troca o código (outra conta ou código novo) |
-| `glicemia-leitor.exe --uma-vez` | lê o aparelho uma vez, envia e sai |
-| `glicemia-leitor.exe --instalar` / `--desinstalar` | inicialização com o Windows |
+RFC 8252 + PKCE (RFC 7636):
 
-Configuração, log e fila offline ficam em `%APPDATA%\Glicemia` (`glicemia-leitor.json`,
-`glicemia-leitor.log`, `pending.json`). A API padrão é a de produção
-(`https://glicosimetro-api.noxtecnologias.com.br/api`); para outra, defina `"apiUrl"` no JSON ou a
-variável `GLICEMIA_API_URL`.
+1. O app abre um servidor só em `127.0.0.1:<porta aleatória>` e abre no navegador
+   `https://glicosimetro.noxtecnologias.com.br/conectar-app?redirect_uri=http://127.0.0.1:<porta>/callback&code_challenge=…&code_challenge_method=S256&state=…`.
+2. Logada, a pessoa permite: a API (`POST /api/reader/authorize`, sessão) emite um código de uso
+   único (5 min, guardado só como hash) e o navegador volta para o endereço local do app.
+3. O app troca código + `code_verifier` em `POST /api/reader/token` por um token com escopo **só**
+   `glucose.import` (aparece em *Ajustes → Tokens de API*, onde pode ser revogado).
 
-**Requisito do aparelho:** a tela precisa mostrar **"USb"** (conecte o cabo com o glicosímetro
-desligado). A leitura completa leva ~20s; se falhar, o leitor tenta de novo na próxima reconexão.
+Só redirecionamentos de loopback são aceitos, e o código não serve sem o verificador PKCE.
 
-## Protocolo (resumo)
+## Arquivos
+
+Configuração, log e fila offline em `%APPDATA%\Glicemia` (`glicemia-leitor.json`,
+`glicemia-leitor.log`, `pending.json`) — a mesma pasta da versão de terminal, cuja conexão é
+aproveitada (o atalho oculto e o executável antigos são removidos na primeira execução).
+
+Para apontar para outro ambiente: `GLICEMIA_API_URL` e `GLICEMIA_PANEL_URL` (ou `apiUrl`/`panelUrl`
+no JSON). Para testes: `GLICEMIA_NO_BROWSER=1` registra a URL de conexão no log em vez de abrir o
+navegador; `GLICEMIA_NO_AUTOSTART=1` não registra a inicialização com o Windows.
+
+## Protocolo do aparelho (resumo)
 
 HID `04D9:B564` (ponte USB→UART Holtek).
 1. Feature report `00 01 00 E1 00 00 00 00 08` (57600 8N1).
 2. Output report `[00, 01, 05]` — **ENQ**: o aparelho responde uma mensagem *vazia* de apresentação.
-3. Output report `[00, 01, 06]` — **ACK**: o aparelho envia a memória inteira (~12s para 500 registros).
+3. Output report `[00, 01, 06]` — **ACK**: o aparelho envia a memória inteira (~12 s para 500 registros).
 4. Input reports de 32 bytes `[tamanho, dados…]`. Mensagem: `SOH "Glucose" CRLF STX` + linhas
    `índice,ano,mês,dia,hora,min,valor,unidade,refeição[,D]` + `ETX EOT`.
 
-Quem só envia ENQ recebe a mensagem vazia e parece que o aparelho "travou" — falta o ACK.
+## Desenvolvimento e build (no Windows)
 
-## Build (no Windows)
-
-O `node-hid` é nativo, então instale e empacote **no Windows** (não no WSL):
+O `node-hid` é nativo (N-API, funciona no Electron sem recompilar); instale e empacote **no Windows**:
 
 ```powershell
 npm install
-npm test          # testes do parser
-npm run package   # gera bin\glicemia-leitor.exe (Node 24 embutido)
+npm test        # testes do protocolo
+npm start       # abre o app
+npm run dist    # gera release\Glicemia-Setup.exe
 ```
+
+Publicar: anexe `Glicemia-Setup.exe` a uma nova release — o painel baixa sempre a `latest`.

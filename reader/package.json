@@ -1,27 +1,48 @@
 {
-  "name": "glicemia-leitor",
-  "version": "1.1.0",
+  "name": "glicemia-app",
+  "productName": "Glicemia",
+  "version": "2.0.0",
   "private": true,
-  "description": "Lê o glicosímetro OK Meter Match II via USB e envia as medições para a API do Glicemia.",
-  "main": "dist/main.js",
-  "bin": "dist/main.js",
+  "description": "Envia as medições do glicosímetro OK Meter Match II para a sua conta do Glicemia.",
+  "author": "Nox Tecnologias",
+  "license": "MIT",
+  "main": "dist/main/index.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/main.js",
-    "test": "tsc -p tsconfig.json && node --test dist/okmeter.test.js",
-    "package": "npm run build && pkg . --compress GZip"
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.renderer.json && node scripts/copy-static.mjs",
+    "start": "npm run build && electron .",
+    "test": "tsc -p tsconfig.json && node --test dist/core/okmeter.test.js",
+    "dist": "npm run build && electron-builder --win nsis --publish never"
   },
   "dependencies": {
     "node-hid": "3.4.0"
   },
   "devDependencies": {
     "@types/node": "22.10.2",
-    "@yao-pkg/pkg": "6.23.0",
+    "electron": "43.8.5",
+    "electron-builder": "26.18.1",
     "typescript": "5.7.2"
   },
-  "pkg": {
-    "targets": ["node24-win-x64"],
-    "outputPath": "bin",
-    "assets": ["node_modules/node-hid/prebuilds/HID-win32-x64/**/*"]
+  "build": {
+    "appId": "br.com.noxtecnologias.glicemia",
+    "productName": "Glicemia",
+    "copyright": "Nox Tecnologias",
+    "directories": { "output": "release", "buildResources": "build" },
+    "files": ["dist/**/*", "assets/**/*", "package.json", "!dist/**/*.test.js"],
+    "asarUnpack": ["node_modules/node-hid/**"],
+    "npmRebuild": false,
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "build/icon.ico",
+      "artifactName": "Glicemia-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Glicemia",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    }
   }
 }

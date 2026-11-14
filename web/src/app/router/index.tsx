@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router'
 import { AuthGuard } from '@/app/guards/AuthGuard'
 import { GuestGuard } from '@/app/guards/GuestGuard'
@@ -6,10 +6,12 @@ import { PermissionGuard } from '@/app/guards/PermissionGuard'
 import { AppLayout } from '@/app/layouts/AppLayout'
 import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { Permission } from '@/shared/constants/permissions'
+import { FullScreenLoading } from '@/shared/design-system'
 import { NotFoundPage } from './NotFoundPage'
 
 const LoginPage = lazy(() => import('@/modules/auth/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/modules/auth/pages/RegisterPage'))
+const ConnectAppPage = lazy(() => import('@/modules/reader-auth/pages/ConnectAppPage'))
 const OverviewPage = lazy(() => import('@/modules/glucose/pages/OverviewPage'))
 const ReadingsPage = lazy(() => import('@/modules/glucose/pages/ReadingsPage'))
 const DevicesPage = lazy(() => import('@/modules/glucose/pages/DevicesPage'))
@@ -39,6 +41,14 @@ export const router = createBrowserRouter([
   {
     element: <AuthGuard />,
     children: [
+      {
+        path: '/conectar-app',
+        element: (
+          <Suspense fallback={<FullScreenLoading />}>
+            <ConnectAppPage />
+          </Suspense>
+        ),
+      },
       {
         element: <AppLayout />,
         children: [
