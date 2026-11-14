@@ -53,6 +53,9 @@ function ClockModal({ device, onClose }: { device: GlucoseDevice; onClose: () =>
   const [splitAt, setSplitAt] = useState('')
   const [splitDays, setSplitDays] = useState('')
   const periods = device.clock_periods
+  const toDays = (seconds: number) => String(Math.round((seconds / 86400) * 100) / 100)
+  const [periodDays, setPeriodDays] = useState(() => periods.map((p) => toDays(p.offset_seconds)))
+  const periodsChanged = periodDays.some((v, i) => v !== toDays(periods[i].offset_seconds))
 
   // Diferença entre a hora real e a que a tela do aparelho mostra, arredondada ao minuto.
   const raw = shown ? Math.round((Date.now() - new Date(shown).getTime()) / 60000) * 60 : null
@@ -90,17 +93,50 @@ function ClockModal({ device, onClose }: { device: GlucoseDevice; onClose: () =>
 
         <section>
           <h3 className="text-sm font-semibold text-foreground">Períodos</h3>
+          <p className="mt-0.5 text-[13px] text-muted">Diferença em dias: negativo = aparelho adiantado, positivo = atrasado.</p>
           <ol className="mt-2 divide-y divide-border rounded-md border border-border">
             {periods.map((period, i) => (
-              <li key={period.from_sequence} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-3 py-2.5 text-sm">
-                <span className="text-foreground">
+              <li key={period.from_sequence} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 py-2.5 text-sm">
+                <span className="min-w-0 text-foreground">
                   {i === periods.length - 1 ? 'Atual' : `Período ${i + 1}`}
                   <span className="ml-2 text-xs text-subtle">{period.readings_count} medições · {periodRange(period)}</span>
+                  <span className="block text-xs text-muted">{describeOffset(period.offset_seconds)}</span>
                 </span>
-                <span className="text-muted">{describeOffset(period.offset_seconds)}</span>
+                <span className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    step="any"
+                    aria-label={`Diferença em dias do período ${i + 1}`}
+                    className="h-9 w-28"
+                    value={periodDays[i] ?? ''}
+                    onChange={(e) => setPeriodDays((d) => d.map((v, j) => (j === i ? e.target.value : v)))}
+                  />
+                  <span className="text-xs text-muted">dias</span>
+                </span>
               </li>
             ))}
           </ol>
+          {periodsChanged && (
+            <Button
+              size="sm"
+              className="mt-2"
+              loading={update.isPending}
+              onClick={() =>
+                update.mutate(
+                  {
+                    id: device.id,
+                    clock_offsets: periods.map((p, i) => ({
+                      from_sequence: p.from_sequence,
+                      offset_seconds: Math.round(Number(periodDays[i] || 0) * 86400),
+                    })),
+                  },
+                  done,
+                )
+              }
+            >
+              Salvar diferenças dos períodos
+            </Button>
+          )}
         </section>
 
         <section className="grid gap-3">
