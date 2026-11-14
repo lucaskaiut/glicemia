@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    /*
+     * Login com Google (Google Identity Services). Só o Client ID é necessário:
+     * a API valida o ID token assinado pelo Google. Vazio = login com Google desligado.
+     */
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+    ],
+
 ];

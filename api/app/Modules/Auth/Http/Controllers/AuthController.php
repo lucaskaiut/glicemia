@@ -7,10 +7,12 @@ use App\Modules\Auth\DTOs\AuthenticatedUser;
 use App\Modules\Auth\DTOs\NewTenantData;
 use App\Modules\Auth\DTOs\NewUserData;
 use App\Modules\Auth\DTOs\RegisterResult;
+use App\Modules\Auth\Http\Requests\GoogleLoginRequest;
 use App\Modules\Auth\Http\Requests\LoginRequest;
 use App\Modules\Auth\Http\Requests\RegisterRequest;
 use App\Modules\Auth\Http\Requests\SelectTenantRequest;
 use App\Modules\Auth\Services\AuthService;
+use App\Modules\Auth\Support\GoogleIdTokenVerifier;
 use App\Modules\Billing\Http\Resources\InvoiceResource;
 use App\Modules\Shared\Http\Controllers\ApiController;
 use App\Modules\Tenant\Http\Resources\AvailableTenantResource;
@@ -21,7 +23,6 @@ use App\Modules\Tenant\Support\Facades\TenantContext;
 use App\Modules\User\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 
 class AuthController extends ApiController
@@ -37,13 +38,7 @@ class AuthController extends ApiController
 
         // A conta (tenant) é criada a partir da própria pessoa; o domínio é só um identificador interno.
         $result = $this->service->register(
-            new NewTenantData(
-                name: $data['name'],
-                document: '',
-                email: $data['email'],
-                phone: null,
-                domain: Str::lower((string) Str::uuid()).'.contas.glicemia.invalid',
-            ),
+            NewTenantData::personal($data['name'], $data['email']),
             NewUserData::fromArray([
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -62,6 +57,26 @@ class AuthController extends ApiController
         $result = $this->service->login(
             $request->validated('email'),
             $request->validated('password'),
+        );
+
+        return $this->success($this->authPayload($result), 'Login realizado com sucesso.');
+    }
+
+    /** Formas de login disponíveis (o Client ID do Google é público). */
+    public function providers(GoogleIdTokenVerifier $google): JsonResponse
+    {
+        return $this->success([
+            'google_client_id' => $google->enabled() ? config('services.google.client_id') : null,
+        ]);
+    }
+
+    public function google(GoogleLoginRequest $request, GoogleIdTokenVerifier $google): JsonResponse
+    {
+        abort_unless($google->enabled(), 404);
+
+        $result = $this->service->loginWithGoogle(
+            $google->verify($request->validated('credential')),
+            (bool) $request->validated('accept_terms', false),
         );
 
         return $this->success($this->authPayload($result), 'Login realizado com sucesso.');

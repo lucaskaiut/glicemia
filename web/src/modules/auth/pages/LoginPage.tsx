@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router'
 import { Alert, Button, Card, CardContent, Form, TextField } from '@/shared/design-system'
 import { isApiError } from '@/shared/api/errors'
+import { GoogleSignIn } from '../components/GoogleSignIn'
 import { applyApiErrorsToForm } from '@/shared/utils/forms'
 import { loginSchema, type LoginFormValues } from '../schemas/auth.schema'
 import { useLogin } from '../hooks/useAuth'
@@ -31,6 +32,10 @@ export default function LoginPage() {
         <div className="mb-6">
           <h1 className="text-lg font-semibold text-foreground">Entrar</h1>
           <p className="mt-1 text-sm text-muted">Acompanhe suas medições de glicose.</p>
+        </div>
+
+        <div className="mb-5">
+          <GoogleSignIn context="signin" />
         </div>
 
         {login.isError && isApiError(login.error) && login.error.status !== 422 && (

@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router'
 import { Alert, Button, Card, CardContent, CheckboxField, Form, TextField } from '@/shared/design-system'
 import { isApiError } from '@/shared/api/errors'
+import { GoogleSignIn } from '../components/GoogleSignIn'
 import { applyApiErrorsToForm } from '@/shared/utils/forms'
 import { registerSchema, type RegisterFormValues } from '../schemas/auth.schema'
 import { useRegister } from '../hooks/useAuth'
@@ -32,6 +33,10 @@ export default function RegisterPage() {
         <div className="mb-6">
           <h1 className="text-lg font-semibold text-foreground">Criar conta</h1>
           <p className="mt-1 text-sm text-muted">Gratuito. Seus dados ficam só na sua conta.</p>
+        </div>
+
+        <div className="mb-5">
+          <GoogleSignIn context="signup" />
         </div>
 
         {register.isError && isApiError(register.error) && register.error.status !== 422 && (

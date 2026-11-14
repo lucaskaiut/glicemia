@@ -60,6 +60,13 @@ valor)*. Reenviar tudo é seguro.
 corrigido (`measured_at` = original + `clock_offset_seconds` do aparelho). Alterar o ajuste
 em *Aparelhos* recalcula todas as medições daquele aparelho.
 
+**Login com Google:** defina `GOOGLE_CLIENT_ID` (Client ID OAuth do tipo *Aplicativo da Web*)
+no `.env` da API. O painel lê o Client ID em `GET /api/auth/providers` — não há variável na
+Vercel. Origens JavaScript autorizadas no Google Cloud: `https://glicosimetro.noxtecnologias.com.br`
+e `http://localhost:5173`. Vínculo: conta já ligada ao Google entra; conta com o mesmo e-mail é
+vinculada (se o e-mail nunca foi confirmado, a senha antiga e os códigos do leitor são revogados);
+e-mail novo cria a conta após o aceite do termo.
+
 Faixas configuráveis por env: `GLUCOSE_VERY_LOW` (54), `GLUCOSE_LOW` (70), `GLUCOSE_HIGH`
 (180), `GLUCOSE_VERY_HIGH` (250).
 

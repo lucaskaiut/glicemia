@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function (): void {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:auth');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:auth');
+    Route::post('google', [AuthController::class, 'google'])->middleware('throttle:auth');
+    Route::get('providers', [AuthController::class, 'providers']);
 
     Route::middleware(['auth:sanctum', 'tenant'])->group(function (): void {
         Route::post('logout', [AuthController::class, 'logout']);
@@ -35,7 +37,6 @@ Route::prefix('auth')->group(function (): void {
 Route::middleware(['auth.multi:sanctum', 'tenant', 'subscription.active'])->group(function (): void {
     Route::get('tenant', [TenantController::class, 'show'])->middleware('permission:tenant.read');
     Route::match(['put', 'patch'], 'tenant', [TenantController::class, 'update'])->middleware('permission:tenant.update');
-
 
     Route::get('users', [UserController::class, 'index'])->middleware('permission:user.read');
     Route::get('users/{user}', [UserController::class, 'show'])->middleware('permission:user.read');

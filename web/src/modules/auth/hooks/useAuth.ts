@@ -29,6 +29,18 @@ export function useLogin() {
   })
 }
 
+export function useGoogleLogin() {
+  const authenticate = useAuthenticate()
+
+  return useMutation({
+    mutationFn: authService.google,
+    onSuccess: async () => {
+      await authenticate()
+      toast.success('Login realizado', 'Bem-vindo!')
+    },
+  })
+}
+
 export function useRegister() {
   const authenticate = useAuthenticate()
 

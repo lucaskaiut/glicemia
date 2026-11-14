@@ -39,6 +39,7 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
+        'google_id',
     ];
 
     protected function casts(): array
@@ -46,6 +47,7 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
             'is_master' => 'boolean',
+            'email_verified_at' => 'datetime',
         ];
     }
 

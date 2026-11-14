@@ -2,6 +2,8 @@
 
 namespace App\Modules\Auth\DTOs;
 
+use Illuminate\Support\Str;
+
 final readonly class NewTenantData
 {
     public function __construct(
@@ -11,6 +13,20 @@ final readonly class NewTenantData
         public ?string $phone,
         public string $domain,
     ) {}
+
+    /**
+     * Conta pessoal do Glicemia: o tenant é a própria pessoa; o domínio é só um identificador interno.
+     */
+    public static function personal(string $name, string $email): self
+    {
+        return new self(
+            name: $name,
+            document: '',
+            email: $email,
+            phone: null,
+            domain: Str::lower((string) Str::uuid()).'.contas.glicemia.invalid',
+        );
+    }
 
     /**
      * @param  array{name: string, document: string, email: string, phone?: ?string, domain: string}  $data

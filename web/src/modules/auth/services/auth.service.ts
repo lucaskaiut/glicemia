@@ -18,7 +18,22 @@ export interface RegisterPayload {
   accept_terms: boolean
 }
 
+export interface AuthProviders {
+  google_client_id: string | null
+}
+
 export const authService = {
+  async providers(): Promise<AuthProviders> {
+    const response = await http.get<ApiResponse<AuthProviders>>('/auth/providers')
+
+    return response.data.data
+  },
+
+  async google(payload: { credential: string; accept_terms?: boolean }): Promise<void> {
+    await ensureCsrfCookie()
+    await http.post('/auth/google', payload)
+  },
+
   async login(payload: LoginPayload): Promise<void> {
     await ensureCsrfCookie()
     await http.post('/auth/login', payload)
