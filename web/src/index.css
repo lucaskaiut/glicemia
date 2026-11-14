@@ -1,0 +1,259 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Identidade "Papel & Tinta" (glicemia).
+ * Papel quente + tinta azul-escura; tipografia serifada nos títulos/números,
+ * cantos retos e linhas finas no lugar de sombras. Navegação no topo.
+ * Ver nox-skeleton/docs/visual-identities.md.
+ */
+:root {
+  --app-bg: #f3efe6;
+  --app-surface: #fbf9f4;
+  --app-surface-2: #ece6da;
+  --app-surface-3: #e0d8c8;
+  --app-border: #d9d1c1;
+  --app-fg: #1d2330;
+  --app-fg-muted: #5c6270;
+  --app-fg-subtle: #8a8f99;
+  --app-primary: #23395b;
+  --app-primary-hover: #182a45;
+  --app-primary-soft: #e3e7ef;
+  --app-primary-fg: #fbf9f4;
+  --app-accent: #b4532a;
+  --app-danger: #b42318;
+  --app-danger-hover: #912018;
+  --app-danger-soft: #f6e3df;
+  --app-success: #2f6b4f;
+  --app-success-soft: #e2eee6;
+  --app-warning: #94600a;
+  --app-warning-soft: #f5ead2;
+  --app-ring: rgb(35 57 91 / 0.45);
+  --app-overlay: rgb(29 35 48 / 0.45);
+  --app-shadow-card: 0 0 0 1px var(--app-border);
+  --app-shadow-raised: 0 0 0 1px var(--app-border), 0 6px 16px -8px rgb(29 35 48 / 0.18);
+  --app-shadow-pop: 0 0 0 1px var(--app-border), 0 18px 40px -12px rgb(29 35 48 / 0.28);
+
+  /* Faixas glicêmicas (convenção AGP) — validadas para daltonismo, ver docs. */
+  --range-very-low: #a3262a;
+  --range-low: #e0563f;
+  --range-in: #1e8a6e;
+  --range-high: #d39a1a;
+  --range-very-high: #b85a12;
+  --chart-grid: #e2dbcd;
+}
+
+.dark {
+  --app-bg: #11161d;
+  --app-surface: #171d26;
+  --app-surface-2: #1f2631;
+  --app-surface-3: #29313e;
+  --app-border: #2c3441;
+  --app-fg: #ece8df;
+  --app-fg-muted: #a3a8b2;
+  --app-fg-subtle: #737985;
+  --app-primary: #9db8e0;
+  --app-primary-hover: #b6cbea;
+  --app-primary-soft: rgb(157 184 224 / 0.14);
+  --app-primary-fg: #11161d;
+  --app-accent: #e08a5f;
+  --app-danger: #f07a6a;
+  --app-danger-hover: #f49a8d;
+  --app-danger-soft: rgb(240 122 106 / 0.12);
+  --app-success: #6fc59b;
+  --app-success-soft: rgb(111 197 155 / 0.12);
+  --app-warning: #e3b45a;
+  --app-warning-soft: rgb(227 180 90 / 0.12);
+  --app-ring: rgb(157 184 224 / 0.55);
+  --app-overlay: rgb(0 0 0 / 0.6);
+  --app-shadow-card: 0 0 0 1px var(--app-border);
+  --app-shadow-raised: 0 0 0 1px var(--app-border), 0 8px 20px -8px rgb(0 0 0 / 0.5);
+  --app-shadow-pop: 0 0 0 1px var(--app-border), 0 18px 40px -12px rgb(0 0 0 / 0.7);
+
+  --range-very-low: #ac2f3b;
+  --range-low: #dd6d45;
+  --range-in: #009d82;
+  --range-high: #b18e15;
+  --range-very-high: #b14d00;
+  --chart-grid: #263040;
+}
+
+@theme inline {
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+
+  /* Cantos retos: encolhe a escala inteira de raios usada pelo design system. */
+  --radius-md: 4px;
+  --radius-lg: 5px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;
+
+  --color-border: var(--app-border);
+  --color-accent: var(--app-accent);
+  --color-range-very-low: var(--range-very-low);
+  --color-range-low: var(--range-low);
+  --color-range-in: var(--range-in);
+  --color-range-high: var(--range-high);
+  --color-range-very-high: var(--range-very-high);
+
+  --color-background: var(--app-bg);
+  --color-surface: var(--app-surface);
+  --color-surface-2: var(--app-surface-2);
+  --color-surface-3: var(--app-surface-3);
+  --color-foreground: var(--app-fg);
+  --color-muted: var(--app-fg-muted);
+  --color-subtle: var(--app-fg-subtle);
+  --color-primary: var(--app-primary);
+  --color-primary-hover: var(--app-primary-hover);
+  --color-primary-soft: var(--app-primary-soft);
+  --color-primary-foreground: var(--app-primary-fg);
+  --color-danger: var(--app-danger);
+  --color-danger-hover: var(--app-danger-hover);
+  --color-danger-soft: var(--app-danger-soft);
+  --color-success: var(--app-success);
+  --color-success-soft: var(--app-success-soft);
+  --color-warning: var(--app-warning);
+  --color-warning-soft: var(--app-warning-soft);
+  --color-ring: var(--app-ring);
+  --color-overlay: var(--app-overlay);
+
+  --shadow-card: var(--app-shadow-card);
+  --shadow-raised: var(--app-shadow-raised);
+  --shadow-pop: var(--app-shadow-pop);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-background font-sans text-[0.9375rem] text-foreground antialiased;
+  font-feature-settings: 'tnum' 1;
+}
+
+h1,
+h2,
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+}
+
+.app-viewport-height {
+  height: 100vh;
+  height: 100dvh;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--app-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--app-primary);
+  color: var(--app-primary-fg);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.2s ease-out;
+}
+
+.animate-modal-in {
+  animation: modal-in 0.18s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.2s ease-out;
+}
+
+.animate-message-in {
+  animation: message-in 0.25s ease-out;
+}
+
+.animate-rise-in {
+  animation: rise-in 0.3s ease-out;
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
