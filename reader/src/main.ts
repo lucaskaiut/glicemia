@@ -62,6 +62,7 @@ async function watch(initial: Config, once: boolean): Promise<void> {
 
   let connectedPath: string | null = null
   let lastPendingTry = 0
+  let lastError: string | null = null
 
   for (;;) {
     try {
@@ -87,11 +88,19 @@ async function watch(initial: Config, once: boolean): Promise<void> {
         }
       }
     } catch (error) {
-      log(`Erro: ${(error as Error).message}`)
+      const message = (error as Error).message
       if (once) throw error
-      // Não insistimos em loop: a próxima tentativa acontece quando o aparelho for reconectado.
-      notify('Glicemia — não consegui ler o aparelho', (error as Error).message)
+      // Só avisa (e loga) uma vez por erro repetido — ex.: falha do USB a cada verificação.
+      if (message !== lastError) {
+        log(`Erro: ${message}`)
+        if (connectedPath) notify('Glicemia — não consegui ler o aparelho', message)
+      }
+      lastError = message
+      // Não insistimos em loop: a próxima leitura acontece quando o aparelho for reconectado.
+      await sleep(config.pollSeconds * 1000)
+      continue
     }
+    lastError = null
 
     await sleep(config.pollSeconds * 1000)
   }
